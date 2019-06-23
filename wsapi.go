@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"runtime"
 	"sync/atomic"
 	"time"
 
@@ -715,20 +714,28 @@ func (s *Session) onVoiceServerUpdate(st *VoiceServerUpdate) {
 	}
 }
 
-type identifyProperties struct {
-	OS              string `json:"$os"`
-	Browser         string `json:"$browser"`
-	Device          string `json:"$device"`
-	Referer         string `json:"$referer"`
-	ReferringDomain string `json:"$referring_domain"`
+// IdentifyProperties contains properties sent to the Discord websocket to
+// identify self.
+type IdentifyProperties struct {
+	UserAgent              string `json:"browser_user_agent"` // used for REST
+	Browser                string `json:"browser"`
+	BrowserVersion         string `json:"browser_version"`
+	ClientBuildNumber      int    `json:"client_build_number"`
+	Device                 string `json:"device"`
+	OS                     string `json:"os"`
+	OSVersion              string `json:"os_version"`
+	Referer                string `json:"referer"`
+	RefererCurrent         string `json:"referer_current"`
+	ReferringDomain        string `json:"referring_domain"`
+	ReferringDomainCurrent string `json:"referring_domain_current"`
+	ReleaseChannel         string `json:"release_channel"`
 }
 
 type identifyData struct {
-	Token          string             `json:"token"`
-	Properties     identifyProperties `json:"properties"`
-	LargeThreshold int                `json:"large_threshold"`
-	Compress       bool               `json:"compress"`
-	Shard          *[2]int            `json:"shard,omitempty"`
+	Token      string             `json:"token"`
+	Properties IdentifyProperties `json:"properties"`
+	Compress   bool               `json:"compress"`
+	Shard      *[2]int            `json:"shard,omitempty"`
 }
 
 type identifyOp struct {
@@ -739,22 +746,14 @@ type identifyOp struct {
 // identify sends the identify packet to the gateway
 func (s *Session) identify() error {
 
-	properties := identifyProperties{runtime.GOOS,
-		"Discordgo v" + VERSION,
-		"",
-		"",
-		"",
-	}
-
-	data := identifyData{s.Token,
-		properties,
-		250,
-		s.Compress,
-		nil,
+	data := identifyData{
+		Token:      s.Token,
+		Properties: s.IDProp,
+		Compress:   s.Compress,
+		Shard:      nil,
 	}
 
 	if s.ShardCount > 1 {
-
 		if s.ShardID >= s.ShardCount {
 			return ErrWSShardBounds
 		}

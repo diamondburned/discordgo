@@ -82,8 +82,9 @@ type Session struct {
 	// The http client used for REST requests
 	Client *http.Client
 
-	// The user agent used for REST APIs
-	UserAgent string
+	// The identify properties used for REST API requests and websocket
+	// identification
+	IDProp IdentifyProperties
 
 	// Stores the last HeartbeatAck that was recieved (in UTC)
 	LastHeartbeatAck time.Time
