@@ -55,3 +55,24 @@ func newRestError(req *http.Request, resp *http.Response, body []byte) *RESTErro
 func (r RESTError) Error() string {
 	return "HTTP " + r.Response.Status + ", " + string(r.ResponseBody)
 }
+
+// GatewayOP is the OP code used for websocket requests
+const (
+	GatewayOPDispatch            int = iota // (Receive)
+	GatewayOPHeartbeat                      // (Send/Receive)
+	GatewayOPIdentify                       // (Send)
+	GatewayOPStatusUpdate                   // (Send)
+	GatewayOPVoiceStateUpdate               // (Send)
+	GatewayOPVoiceServerPing                // (Send)
+	GatewayOPResume                         // (Send)
+	GatewayOPReconnect                      // (Receive)
+	GatewayOPRequestGuildMembers            // (Send)
+	GatewayOPInvalidSession                 // (Receive)
+	GatewayOPHello                          // (Receive)
+	GatewayOPHeartbeatACK                   // (Receive)
+)
+
+const (
+	GatewayOPCallConnect        = 13
+	GatewayOPGuildSubscriptions = 14
+)

@@ -295,7 +295,7 @@ func (s *Session) heartbeat(wsConn *websocket.Conn, listening <-chan interface{}
 		s.log(LogDebug, "sending gateway websocket heartbeat seq %d", sequence)
 		s.wsMutex.Lock()
 		s.LastHeartbeatSent = time.Now().UTC()
-		err = wsConn.WriteJSON(heartbeatOp{1, sequence})
+		err = wsConn.WriteJSON(heartbeatOp{GatewayOPHeartbeat, sequence})
 		s.wsMutex.Unlock()
 		if err != nil || time.Now().UTC().Sub(last) > (heartbeatIntervalMsec*FailedHeartbeatAcks) {
 			if err != nil {
@@ -391,8 +391,45 @@ func (s *Session) UpdateStatusComplex(usd UpdateStatusData) (err error) {
 	}
 
 	s.wsMutex.Lock()
-	err = s.wsConn.WriteJSON(updateStatusOp{3, usd})
+	err = s.wsConn.WriteJSON(updateStatusOp{GatewayOPStatusUpdate, usd})
 	s.wsMutex.Unlock()
+
+	return
+}
+
+type guildSubscriptionsData struct {
+	GuildID    int64 `json:"guild_id,string"`
+	Typing     bool  `json:"typing"`
+	Activities bool  `json:"activities"`
+}
+
+type guildSubscriptionsOp struct {
+	Op   int                    `json:"op"`
+	Data guildSubscriptionsData `json:"d"`
+}
+
+// SubscribeGuild sends a subscribe event to Discord, requesting additional
+// events like OnTyping to be received.
+func (s *Session) SubscribeGuild(guildID int64, typing, activities bool) (err error) {
+	s.log(LogInformational, "called")
+
+	s.RLock()
+	defer s.RUnlock()
+	if s.wsConn == nil {
+		return ErrWSNotFound
+	}
+
+	s.wsMutex.Lock()
+	defer s.wsMutex.Unlock()
+
+	err = s.wsConn.WriteJSON(guildSubscriptionsOp{
+		Op: GatewayOPGuildSubscriptions,
+		Data: guildSubscriptionsData{
+			GuildID:    guildID,
+			Typing:     typing,
+			Activities: activities,
+		},
+	})
 
 	return
 }
@@ -642,7 +679,11 @@ func (s *Session) ChannelVoiceJoinManual(gID, cID string, mute, deaf bool) (err 
 	s.log(LogInformational, "called")
 
 	// Send the request to Discord that we want to join the voice channel
-	data := voiceChannelJoinOp{4, voiceChannelJoinData{&gID, &cID, mute, deaf}}
+	data := voiceChannelJoinOp{
+		GatewayOPVoiceStateUpdate,
+		voiceChannelJoinData{&gID, &cID, mute, deaf},
+	}
+
 	s.wsMutex.Lock()
 	err = s.wsConn.WriteJSON(data)
 	s.wsMutex.Unlock()
@@ -761,7 +802,7 @@ func (s *Session) identify() error {
 		data.Shard = &[2]int{s.ShardID, s.ShardCount}
 	}
 
-	op := identifyOp{2, data}
+	op := identifyOp{GatewayOPIdentify, data}
 
 	s.wsMutex.Lock()
 	err := s.wsConn.WriteJSON(op)
