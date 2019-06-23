@@ -146,4 +146,5 @@ var (
 	EndpointApplication       = func(aID string) string { return EndpointApplications + "/" + aID }
 	EndpointApplicationsBot   = func(aID string) string { return EndpointApplications + "/" + aID + "/bot" }
 	EndpointApplicationAssets = func(aID string) string { return EndpointApplications + "/" + aID + "/assets" }
+	EndpointApplicationRPC    = func(aID string) string { return EndpointApplications + "/" + aID + "/rpc" }
 )

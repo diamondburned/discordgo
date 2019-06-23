@@ -105,6 +105,10 @@ func (s *Session) ApplicationDelete(appID string) (err error) {
 	return
 }
 
+// ------------------------------------------------------------------------------------------------
+// Code specific to Discord OAuth2 Application Asset(s)
+// ------------------------------------------------------------------------------------------------
+
 // Asset struct stores values for an asset of an application
 type Asset struct {
 	Type int    `json:"type"`
@@ -121,6 +125,34 @@ func (s *Session) ApplicationAssets(appID string) (ass []*Asset, err error) {
 	}
 
 	err = unmarshal(body, &ass)
+	return
+}
+
+// ------------------------------------------------------------------------------------------------
+// Code specific to Discord OAuth2 Rich Presence applications
+// ------------------------------------------------------------------------------------------------
+
+// ApplicationRPC stores a Rich Presence Application
+type ApplicationRPC struct {
+	Description string `json:"description"`
+	Name        string `json:"name"`
+	Summary     string `json:"summary"`
+	Flags       int    `json:"flags"`
+	VerifyKey   string `json:"verify_key"`
+	CoverImage  string `json:"cover_image,omitempty"`
+	ID          string `json:"id"`
+	Icon        string `json:"icon"`
+}
+
+// ApplicationRPC returns the Rich Presence Application from the API.
+func (s *Session) ApplicationRPC(appID string) (rpc *ApplicationRPC, err error) {
+
+	body, err := s.RequestWithBucketID("GET", EndpointApplicationRPC(appID), nil, EndpointApplicationRPC(""))
+	if err != nil {
+		return
+	}
+
+	err = unmarshal(body, &rpc)
 	return
 }
 
