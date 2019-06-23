@@ -2,6 +2,38 @@ package discordgo
 
 import "strings"
 
+// UserPremiumType is the type of Nitro subscription on a user's account
+type UserPremiumType int
+
+const (
+	// UserPremiumTypeNone is no Premium/Nitro
+	UserPremiumTypeNone UserPremiumType = iota
+
+	// UserPremiumTypeNitroClassic includes app perks like animated emojis and
+	// avatars, but not games
+	UserPremiumTypeNitroClassic
+
+	// UserPremiumTypeNitro includes app perks as well as the games subscription
+	// service
+	UserPremiumTypeNitro
+)
+
+// UserFlags is the flags on a user's account
+type UserFlags int
+
+const (
+	UserFlagNone            UserFlags = 0
+	UserFlagDiscordEmployee UserFlags = 1 << iota
+	UserFlagDiscordPartner
+	UserFlagHypeSquadEvents
+	UserFlagBugHunter
+	UserFlagHouseBravery
+	UserFlagHouseBrilliance
+	UserFlagHouseBalance
+	UserFlagEarlySupporter
+	UserFlagTeamUser
+)
+
 // A User stores all data for an individual Discord user.
 type User struct {
 	// The ID of the user.
@@ -36,6 +68,12 @@ type User struct {
 
 	// Whether the user is a bot.
 	Bot bool `json:"bot"`
+
+	// The type of Nitro subscription on a user's account.
+	PremiumType UserPremiumType `json:"premium_type"`
+
+	// The flags on a user's account.
+	Flags UserFlags `json:"flags"`
 }
 
 // String returns a unique identifier of the form username#discriminator
