@@ -40,7 +40,7 @@ var (
 	EndpointCDNChannelIcons = EndpointCDN + "channel-icons/"
 
 	EndpointAuth           = EndpointAPI + "auth/"
-	EndpointTOTP           = EndpointAuth + "totp"
+	EndpointTOTP           = EndpointAuth + "mfa/totp"
 	EndpointLogin          = EndpointAuth + "login"
 	EndpointLogout         = EndpointAuth + "logout"
 	EndpointVerify         = EndpointAuth + "verify"

@@ -14,8 +14,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-retryablehttp"
-	"github.com/pkg/errors"
 	"image"
 	_ "image/jpeg" // For JPEG decoding
 	_ "image/png"  // For PNG decoding
@@ -29,6 +27,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
+	"github.com/pkg/errors"
 )
 
 // All error constants
@@ -231,14 +232,16 @@ func unmarshal(data []byte, v interface{}) error {
 }
 
 type TOTP struct {
-	Code   string `json:"code"`
-	Ticket string `json:"ticket"`
+	Code          string    `json:"code"`
+	GiftCodeSkuID *struct{} `json:"gift_code_sku_id"` // dunno
+	LoginSource   *struct{} `json:"login_source"`     // dunno
+	Ticket        string    `json:"ticket"`
 }
 
 type LoginResponse struct {
 	MFA    bool   `json:"mfa"`
 	SMS    bool   `json:"sms"`
-	Ticket string `json:"string"`
+	Ticket string `json:"ticket"`
 	Token  string `json:"token"`
 }
 
@@ -273,9 +276,16 @@ func (s *Session) Login(email, password, mfa string) (err error) {
 		if err := unmarshal(resp, &login); err != nil {
 			return err
 		}
+	} else {
+		// Trigger the below TOTP call
+		login.MFA = true
 	}
 
 	if login.MFA {
+		if login.Ticket != "" {
+			s.mfaTicket = login.Ticket
+		}
+
 		if mfa != "" {
 			// An MFA ticket already exists, redundant to retry logging in
 			l, err := s.TOTP(s.mfaTicket, mfa)
@@ -295,7 +305,7 @@ func (s *Session) Login(email, password, mfa string) (err error) {
 }
 
 func (s *Session) TOTP(ticket, code string) (*LoginResponse, error) {
-	totp := TOTP{ticket, code}
+	totp := TOTP{code, nil, nil, ticket}
 
 	resp, err := s.RequestWithBucketID(
 		"POST", EndpointTOTP, totp, EndpointTOTP,

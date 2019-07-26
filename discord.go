@@ -94,17 +94,6 @@ func New(l Login) (s *Session, err error) {
 	// Parse the login struct
 	if l.Token != "" {
 		s.Token = l.Token
-	}
-
-	auth := l.Email
-	pass := l.Password
-
-	// If only one string was provided, assume it is an auth token.
-	// Otherwise get auth token from Discord, if a token was specified
-	// Discord will verify it for free, or log the user in if it is
-	// invalid.
-	if pass == "" {
-		s.Token = auth
 	} else {
 		if err = s.Login(l.Email, l.Password, l.MFA); err != nil {
 			return nil, err
