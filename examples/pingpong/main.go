@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rumblefrog/discordgo"
+	"github.com/diamondburned/discordgo"
 )
 
 // Variables used for command line parameters

@@ -83,7 +83,7 @@ func New(l Login) (s *Session, err error) {
 		voiceConnections: make(map[int64]*VoiceConnection),
 	}
 
-	s.UserAgent = fmt.Sprintf("DiscordBot (https://github.com/rumblefrog/discordgo, v%s)", VERSION)
+	s.UserAgent = fmt.Sprintf("DiscordBot (https://github.com/diamondburned/discordgo, v%s)", VERSION)
 
 	s.Client.CheckRetry = CheckRetry
 	s.Client.RetryMax = s.MaxRestRetries

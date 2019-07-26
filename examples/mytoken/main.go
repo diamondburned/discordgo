@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 <<<<<<< HEAD
-	"github.com/rumblefrog/discordgo"
+	"github.com/diamondburned/discordgo"
 =======
 	"github.com/jonas747/discordgo"
 >>>>>>> jonas747-yagpdb

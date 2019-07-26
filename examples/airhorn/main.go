@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rumblefrog/discordgo"
+	"github.com/diamondburned/discordgo"
 )
 
 func init() {
